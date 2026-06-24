@@ -332,12 +332,28 @@ export const DEFAULT_SETTINGS: Settings = {
 
 // ─── App State Shape ─────────────────────────────────────────
 
+// Pricing-page setting (NOT a SKU field). Persisted per channel.
+export interface ShippingRecoveryByChannel {
+  website: number;
+  whatsapp: number;
+  fbm: number;
+  fba: number;
+}
+
+export const DEFAULT_SHIPPING_RECOVERY: ShippingRecoveryByChannel = {
+  website: 0,
+  whatsapp: 0,
+  fbm: 0,
+  fba: 0,
+};
+
 export interface AppData {
   skus: SKU[];
   packagingComponents: PackagingComponent[];
   logisticsContracts: LogisticsContract[];
   fulfilmentProviders: FulfilmentProvider[];
   settings: Settings;
+  shippingRecovery: ShippingRecoveryByChannel; // pricing-page setting, persisted
   version: string; // for migration
 }
 
@@ -347,5 +363,6 @@ export const DEFAULT_APP_DATA: AppData = {
   logisticsContracts: [],
   fulfilmentProviders: DEFAULT_FULFILMENT_PROVIDERS,
   settings: DEFAULT_SETTINGS,
+  shippingRecovery: DEFAULT_SHIPPING_RECOVERY,
   version: "1.0.0",
 };

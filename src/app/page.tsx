@@ -107,6 +107,7 @@ export default function DashboardPage() {
       logisticsContracts: store.logisticsContracts,
       fulfilmentProviders: store.fulfilmentProviders,
       settings: store.settings,
+      shippingRecovery: store.shippingRecovery,
       version: store.version,
     });
     store.markBackup();
@@ -136,7 +137,7 @@ export default function DashboardPage() {
       <div className="mb-8">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-1">Internal Tool · Sprint 1</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand-600 mb-1">Internal Tool</p>
             <h1 className="text-2xl font-semibold text-foreground">The Flavor Bag</h1>
             <p className="mt-1 text-sm text-muted-foreground">Pricing Engine — Contribution-margin costing across Website, WhatsApp, Amazon FBM &amp; FBA</p>
           </div>
@@ -253,18 +254,18 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Sprint 2 coming */}
+      {/* Pricing engine live */}
       <Card className="border-dashed border-brand-200">
         <CardContent className="p-6 text-center">
-          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-brand-600/10">
-            <TrendingUp className="h-5 w-5 text-brand-600" />
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-forest-500/10">
+            <TrendingUp className="h-5 w-5 text-forest-500" />
           </div>
-          <h3 className="font-medium text-sm text-foreground">Pricing Engine coming in Sprint 2</h3>
+          <h3 className="font-medium text-sm text-foreground">Pricing engine is live</h3>
           <p className="mt-1 text-xs text-muted-foreground max-w-sm mx-auto">
-            Add your SKUs, cost library, logistics contracts, and fulfilment providers now. Sprint 2 plugs in the calculation engine and gives you break-even, floor, and suggested prices across all four channels.
+            Break-even, floor, suggested price, MRP and contribution are computed across all four channels. Reverse pricing, what-if scenarios, the logistics comparison and founder recommendations are all available from the sidebar.
           </p>
           <div className="mt-4 flex justify-center gap-2 flex-wrap">
-            {["Break-even price", "Floor price", "Suggested SP", "MRP", "Contribution %", "What-if sliders", "Reverse pricing", "Founder recommendations"].map((f) => (
+            {["Break-even", "Floor", "Suggested SP", "MRP", "Contribution %", "What-if sliders", "Reverse pricing", "Recommendations"].map((f) => (
               <Badge key={f} variant="muted" className="text-xs">{f}</Badge>
             ))}
           </div>

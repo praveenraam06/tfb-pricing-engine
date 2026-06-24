@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAppStore } from "@/store/app-store";
+import { marginWarningPct } from "@/lib/calculation-engine";
 import type { GSTClass, ChannelFeeRule } from "@/models";
 import { useToast } from "@/hooks/use-toast";
 import { formatINR } from "@/utils/format";
@@ -39,6 +40,9 @@ const bizSchema = z.object({
   operationsCost: z.coerce.number().min(0),
   subscriptionsCost: z.coerce.number().min(0),
   otherCost: z.coerce.number().min(0),
+}).refine((d) => d.defaultFloorMargin <= d.defaultMargin, {
+  message: "Default floor margin must be ≤ default target margin",
+  path: ["defaultFloorMargin"],
 });
 type BizFormValues = z.infer<typeof bizSchema>;
 
@@ -207,6 +211,14 @@ export default function SettingsPage() {
                 <CardDescription className="text-xs">Applied to new SKUs unless overridden per-SKU.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {marginWarningPct(Number(watch("defaultMargin")) || 0, Number(watch("defaultFloorMargin")) || 0) && (
+                  <div className="flex items-start gap-2 rounded-lg border border-rust-500/30 bg-rust-500/5 px-3 py-2">
+                    <Info className="h-3.5 w-3.5 text-rust-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-rust-500">
+                      {marginWarningPct(Number(watch("defaultMargin")) || 0, Number(watch("defaultFloorMargin")) || 0)} Settings can&apos;t be saved until fixed.
+                    </p>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Default Target Margin (%)</Label>
@@ -215,6 +227,7 @@ export default function SettingsPage() {
                   <div className="space-y-1.5">
                     <Label className="text-xs">Default Floor Margin (%)</Label>
                     <Input type="number" step="0.1" {...register("defaultFloorMargin")} />
+                    {errors.defaultFloorMargin && <p className="text-[10px] text-rust-500">{errors.defaultFloorMargin.message}</p>}
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">MRP Rounding (₹)</Label>

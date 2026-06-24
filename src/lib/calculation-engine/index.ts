@@ -1,45 +1,33 @@
 // ============================================================
-// TFB Pricing Engine — Calculation Engine (PLACEHOLDER)
-// Formulas are frozen in V1 Calculation Specification.
-// Sprint 2 will implement this module.
-// ============================================================
-// DO NOT implement pricing logic here until Sprint 2 is approved.
+// TFB Pricing Engine — Calculation Engine (Sprint 2)
+// Public entry point. Formulas frozen per V1 Calculation Spec.
 // ============================================================
 
-export interface CalcInputs {
-  // Placeholder — full spec in V1 Calculation Specification
-  skuId: string;
-}
+export * from "./types";
+export * from "./engine";
+export * from "./resolve";
+export * from "./scenario";
+export * from "./validation";
 
-export interface CalcOutputs {
-  // Placeholder — full spec in V1 Calculation Specification
-  status: "placeholder";
-  message: string;
-}
+import { computeChannel } from "./engine";
+import { resolveAllChannels } from "./resolve";
+import type { ResolveContext } from "./resolve";
+import type { SKU, ChannelKey as StoreChannelKey } from "@/models";
+import type { ChannelResult } from "./types";
 
 /**
- * PLACEHOLDER — Sprint 2 will implement this.
- * Formula order per Calc Spec §4:
- * 1. ingredient_cost
- * 2. packaging_cost
- * 3. inbound_per_unit
- * 4. C_base = 1+2+3
- * 5. last_mile (500g slabs, §8) [skip FBA]
- * 6. return + damage allowances
- * 7. C_var (channel-specific)
- * 8. k = 1/(1+GST_out%)
- * 9. Break-even, Floor, Suggested SP, MRP
- * 10. Contribution ₹, Contribution %, Markup %
- * 11. Loss-zone status
- * 12. Reverse mode
- * 13. Delta vs live price
- * 14. Bundle mode (cart-level slabs)
+ * Convenience: compute every channel for a SKU directly from store data.
  */
-export function calculatePricing(_inputs: CalcInputs): CalcOutputs {
+export function priceSKU(
+  sku: SKU,
+  ctx: ResolveContext,
+  recoveryByChannel?: Partial<Record<StoreChannelKey, number>>
+): Record<StoreChannelKey, ChannelResult> {
+  const inputs = resolveAllChannels(sku, ctx, recoveryByChannel);
   return {
-    status: "placeholder",
-    message: "Calculation engine will be implemented in Sprint 2.",
+    website: computeChannel(inputs.website),
+    whatsapp: computeChannel(inputs.whatsapp),
+    fbm: computeChannel(inputs.fbm),
+    fba: computeChannel(inputs.fba),
   };
 }
-
-export const CALC_ENGINE_VERSION = "0.0.0-placeholder";

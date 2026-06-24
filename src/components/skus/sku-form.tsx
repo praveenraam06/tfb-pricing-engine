@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { marginWarningPct } from "@/lib/calculation-engine";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/app-store";
@@ -54,6 +55,9 @@ const skuSchema = z.object({
   livePriceWhatsapp: z.coerce.number().optional(),
   livePriceFbm: z.coerce.number().optional(),
   livePriceFba: z.coerce.number().optional(),
+}).refine((d) => d.floorMargin <= d.targetMargin, {
+  message: "Floor margin must be ≤ target margin",
+  path: ["floorMargin"],
 });
 
 type SKUFormValues = z.infer<typeof skuSchema>;
@@ -355,6 +359,14 @@ export function SKUForm({ sku, onSave, onCancel }: SKUFormProps) {
             <Input type="number" step="0.1" {...register("mrpHeadroomPct")} />
           </FormField>
         </div>
+        {marginWarningPct(Number(watch("targetMargin")) || 0, Number(watch("floorMargin")) || 0) && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-rust-500/30 bg-rust-500/5 px-3 py-2">
+            <Info className="h-3.5 w-3.5 text-rust-500 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-rust-500">
+              {marginWarningPct(Number(watch("targetMargin")) || 0, Number(watch("floorMargin")) || 0)} This SKU can&apos;t be saved or priced until fixed.
+            </p>
+          </div>
+        )}
         <div className="mt-3">
           <FormField label="Free Shipping Threshold (₹)" hint="Website/WhatsApp: above this, slab cost absorbed into C_var">
             <Input type="number" {...register("freeShippingThreshold")} placeholder="e.g. 500 (optional)" />

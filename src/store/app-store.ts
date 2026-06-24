@@ -59,6 +59,9 @@ interface AppStore extends AppData {
   resetData: () => void;
   markBackup: () => void;
 
+  // ── Pricing-page settings ──
+  setShippingRecovery: (channel: keyof AppData["shippingRecovery"], value: number) => void;
+
   // ── Helpers ──
   getGSTRate: (hsnId: string) => number;
 }
@@ -212,11 +215,27 @@ export const useAppStore = create<AppStore>()(
         })),
 
       // ── Data Management ──────────────────────────────────
-      importData: (data) => set({ ...data, _hydrated: true }),
+      importData: (data) =>
+        set({
+          ...DEFAULT_APP_DATA,
+          ...data,
+          // Guarantee all four channel keys exist even for old/partial backups.
+          shippingRecovery: {
+            ...DEFAULT_APP_DATA.shippingRecovery,
+            ...(data.shippingRecovery ?? {}),
+          },
+          _hydrated: true,
+        }),
       resetData: () => set({ ...DEFAULT_APP_DATA, _hydrated: true }),
       markBackup: () =>
         set((state) => ({
           settings: { ...state.settings, lastBackup: now() },
+        })),
+
+      // ── Pricing-page settings ────────────────────────────
+      setShippingRecovery: (channel, value) =>
+        set((state) => ({
+          shippingRecovery: { ...state.shippingRecovery, [channel]: value },
         })),
 
       // ── Helpers ──────────────────────────────────────────

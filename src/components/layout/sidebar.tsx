@@ -36,12 +36,12 @@ const NAV_ITEMS: NavItem[] = [
   { group: "Manage", label: "Logistics", href: "/logistics", icon: Truck },
   { group: "Manage", label: "Fulfilment", href: "/fulfilment", icon: Warehouse },
   // Pricing (Sprint 2)
-  { group: "Pricing", label: "Pricing Engine", href: "/pricing", icon: Calculator, badge: "Sprint 2" },
-  { group: "Pricing", label: "Scenario Analysis", href: "/scenarios", icon: TrendingUp, badge: "Sprint 2" },
+  { group: "Pricing", label: "Pricing Engine", href: "/pricing", icon: Calculator },
+  { group: "Pricing", label: "Scenario Analysis", href: "/scenarios", icon: TrendingUp },
   // Insights (Sprint 2)
-  { group: "Insights", label: "Reports", href: "/reports", icon: BarChart3, badge: "Sprint 2" },
+  { group: "Insights", label: "Reports", href: "/reports", icon: BarChart3 },
   { group: "Insights", label: "Founder View", href: "/founder", icon: Brain, badge: "Sprint 2" },
-  { group: "Insights", label: "Recommendations", href: "/recommendations", icon: Lightbulb, badge: "Sprint 2" },
+  { group: "Insights", label: "Recommendations", href: "/recommendations", icon: Lightbulb },
   // Config
   { group: "Config", label: "Settings", href: "/settings", icon: Settings },
 ];
@@ -60,7 +60,7 @@ export function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold text-brand-50 leading-none">Pricing Engine</p>
-          <p className="text-[10px] text-brand-400 mt-0.5">v1.0 · Sprint 1</p>
+          <p className="text-[10px] text-brand-400 mt-0.5">v1.0</p>
         </div>
       </div>
 

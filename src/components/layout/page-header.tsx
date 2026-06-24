@@ -40,6 +40,7 @@ export function PageHeader({ title, description, actions, showDataActions = fals
       logisticsContracts: store.logisticsContracts,
       fulfilmentProviders: store.fulfilmentProviders,
       settings: store.settings,
+      shippingRecovery: store.shippingRecovery,
       version: store.version,
     };
     exportJSON(appData);
