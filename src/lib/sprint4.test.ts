@@ -126,7 +126,7 @@ describe("6. Eshopbox variable fees separate from fixed", () => {
     expect(band1.inboundFee).toBe(4);
     expect(band1.outboundFirstItemFee).toBe(10);
     // Fixed structure carries no per-unit band fields.
-    expect((eshopbox.fixedCosts as Record<string, unknown>).inboundFee).toBeUndefined();
+    expect((eshopbox.fixedCosts as unknown as Record<string, unknown>).inboundFee).toBeUndefined();
   });
   it("storage + VAS + platform fee are their own structures", () => {
     expect(eshopbox.storageBands!.length).toBeGreaterThan(0);

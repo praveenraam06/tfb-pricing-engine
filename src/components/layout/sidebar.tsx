@@ -40,7 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { group: "Pricing", label: "Scenario Analysis", href: "/scenarios", icon: TrendingUp },
   // Insights (Sprint 2)
   { group: "Insights", label: "Reports", href: "/reports", icon: BarChart3 },
-  { group: "Insights", label: "Founder View", href: "/founder", icon: Brain, badge: "Sprint 2" },
+  { group: "Insights", label: "Founder View", href: "/founder", icon: Brain },
   { group: "Insights", label: "Recommendations", href: "/recommendations", icon: Lightbulb },
   // Config
   { group: "Config", label: "Settings", href: "/settings", icon: Settings },
