@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/store/app-store";
 import { exportJSON, importJSON } from "@/utils/export";
+import { buildExportData } from "@/lib/persistence";
 import { formatDateRelative, formatINR } from "@/utils/format";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
@@ -101,15 +102,7 @@ export default function DashboardPage() {
     settings.fixedCosts.other;
 
   const handleExport = () => {
-    exportJSON({
-      skus: store.skus,
-      packagingComponents: store.packagingComponents,
-      logisticsContracts: store.logisticsContracts,
-      fulfilmentProviders: store.fulfilmentProviders,
-      settings: store.settings,
-      shippingRecovery: store.shippingRecovery,
-      version: store.version,
-    });
+    exportJSON(buildExportData(store));
     store.markBackup();
     toast({ title: "Backup exported", description: "JSON file downloaded. This is your source of truth." });
   };

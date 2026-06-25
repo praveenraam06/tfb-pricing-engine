@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAppStore } from "@/store/app-store";
+import { totalWithGst } from "@/lib/persistence";
 import {
   priceSKU,
   type ResolveContext,
@@ -164,18 +165,18 @@ export default function ReportsPage() {
 }
 
 function CarrierComparison() {
-  const logisticsContracts = useAppStore((s) => s.logisticsContracts);
-  const withSlabs = logisticsContracts.filter((c) => c.active && c.slabRates.length > 0);
+  const cards = useAppStore((s) => s.courierRateCards);
+  const active = cards.filter((c) => c.active && c.direction === "forward");
 
-  if (withSlabs.length === 0) {
+  if (active.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="p-5 flex items-start gap-3">
           <Truck className="h-4 w-4 text-muted-foreground mt-0.5" />
           <div>
-            <p className="text-xs font-medium">Carrier rate comparison</p>
+            <p className="text-xs font-medium">Courier rate-card comparison</p>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              Add slab rates to your active logistics contracts to compare carriers side by side at common weight bands. Contracts without slab rates aren&apos;t shown here.
+              Add active forward courier rate cards in Logistics &amp; Rate Cards to compare carriers side by side at common weight bands, GST-inclusive.
             </p>
           </div>
         </CardContent>
@@ -184,37 +185,53 @@ function CarrierComparison() {
   }
 
   const bands = [250, 500, 1000, 1500];
-  const cost = (firstRate: number, addRate: number, slabSize: number, weight: number) => {
-    const slabs = Math.max(1, Math.ceil(weight / slabSize));
-    return firstRate + (slabs - 1) * addRate;
+  // Cost at a given gross weight for one rate-card row, GST-inclusive.
+  const rowCost = (c: (typeof active)[number], weight: number): number => {
+    let base: number;
+    if (c.additionalRate > 0 && c.additionalUnitGrams > 0) {
+      // first slab + additional pattern
+      const firstTo = c.weightSlabToGrams ?? c.additionalUnitGrams;
+      const over = Math.max(0, weight - firstTo);
+      const extra = Math.ceil(over / c.additionalUnitGrams);
+      base = c.baseRate + extra * c.additionalRate;
+    } else {
+      // weight-band row — applies within its own band; flat base otherwise
+      base = c.baseRate;
+    }
+    base += c.handlingFee + c.remoteAreaSurcharge;
+    base *= 1 + c.fuelSurchargePct / 100;
+    return totalWithGst(base, c.gstPct, c.gstTreatment);
   };
 
+  // Cheapest per band for highlighting.
+  const cheapest: Record<number, number> = {};
+  for (const b of bands) cheapest[b] = Math.min(...active.map((c) => rowCost(c, b)));
+
   return (
-    <div className="rounded-xl border overflow-hidden">
+    <div className="rounded-xl border overflow-x-auto">
       <div className="px-4 py-2.5 bg-muted/30 border-b">
-        <p className="text-xs font-medium">Carrier rate comparison (₹ by gross weight)</p>
+        <p className="text-xs font-medium">Courier rate-card comparison <span className="text-muted-foreground font-normal">(forward, ₹ incl. GST by gross weight · cheapest highlighted)</span></p>
       </div>
       <table className="w-full text-sm">
         <thead className="bg-muted/10">
           <tr>
-            <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5">Carrier</th>
+            <th className="text-left text-xs font-medium text-muted-foreground px-4 py-2.5 whitespace-nowrap">Provider · Mode · Zone</th>
+            <th className="text-center text-xs font-medium text-muted-foreground px-3 py-2.5">GST</th>
             {bands.map((b) => <th key={b} className="text-right text-xs font-medium text-muted-foreground px-4 py-2.5">{b}g</th>)}
           </tr>
         </thead>
         <tbody>
-          {withSlabs.map((c) => {
-            const slab = c.slabRates[0];
-            return (
-              <tr key={c.id} className="border-t hover:bg-muted/20">
-                <td className="px-4 py-3 font-medium">{c.vendor} <span className="text-[10px] text-muted-foreground">({c.name})</span></td>
-                {bands.map((b) => (
-                  <td key={b} className="px-4 py-3 text-right font-data">
-                    {formatINR(cost(slab.firstSlabRate, slab.additionalSlabRate, slab.firstSlabGrams || 500, b))}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
+          {active.map((c) => (
+            <tr key={c.id} className="border-t hover:bg-muted/20">
+              <td className="px-4 py-3 font-medium whitespace-nowrap">{c.provider} <span className="text-[10px] text-muted-foreground">· {c.serviceMode} · {c.destinationZone}</span></td>
+              <td className="px-3 py-3 text-center"><Badge variant={c.gstTreatment === "inclusive" ? "success" : "warning"} className="text-[10px]">{c.gstPct}% {c.gstTreatment === "inclusive" ? "incl" : "excl"}</Badge></td>
+              {bands.map((b) => {
+                const v = rowCost(c, b);
+                const isMin = Math.abs(v - cheapest[b]) < 0.001;
+                return <td key={b} className={`px-4 py-3 text-right font-data ${isMin ? "text-forest-600 font-semibold" : ""}`}>{formatINR(v)}</td>;
+              })}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

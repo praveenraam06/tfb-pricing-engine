@@ -18,6 +18,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CourierRateCardsTab } from "@/components/logistics/courier-rate-cards-tab";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAppStore } from "@/store/app-store";
@@ -31,7 +33,9 @@ const CHANNELS: ChannelKey[] = ["website", "whatsapp", "fbm", "fba"];
 const schema = z.object({
   name: z.string().min(1, "Contract name required"),
   vendor: z.string().min(1, "Vendor required"),
+  contractType: z.enum(["courier", "fulfilment", "marketplace", "other"]),
   effectiveDate: z.string().min(1, "Effective date required"),
+  effectiveUntil: z.string().optional(),
   active: z.boolean(),
   notes: z.string().optional(),
   channels: z.array(z.enum(["website", "whatsapp", "fbm", "fba"])).min(1, "Select at least one channel"),
@@ -59,14 +63,18 @@ function ContractForm({ contract, onSave, onCancel, fileInfo }: ContractFormProp
     defaultValues: contract ? {
       name: contract.name,
       vendor: contract.vendor,
+      contractType: contract.contractType ?? "courier",
       effectiveDate: contract.effectiveDate,
+      effectiveUntil: contract.effectiveUntil ?? "",
       active: contract.active,
       notes: contract.notes ?? "",
       channels: contract.channels,
     } : {
       name: "",
       vendor: "",
+      contractType: "courier",
       effectiveDate: new Date().toISOString().split("T")[0],
+      effectiveUntil: "",
       active: true,
       notes: "",
       channels: ["website", "whatsapp"],
@@ -130,9 +138,25 @@ function ContractForm({ contract, onSave, onCancel, fileInfo }: ContractFormProp
           {errors.vendor && <p className="text-[10px] text-rust-500">{errors.vendor.message}</p>}
         </div>
         <div className="space-y-1.5">
+          <Label className="text-xs">Contract Type *</Label>
+          <Select value={watch("contractType")} onValueChange={(v) => setValue("contractType", v as "courier" | "fulfilment" | "marketplace" | "other")}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="courier">Courier</SelectItem>
+              <SelectItem value="fulfilment">Fulfilment</SelectItem>
+              <SelectItem value="marketplace">Marketplace</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
           <Label className="text-xs">Effective Date *</Label>
           <Input type="date" {...register("effectiveDate")} />
           {errors.effectiveDate && <p className="text-[10px] text-rust-500">{errors.effectiveDate.message}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs">Effective Until</Label>
+          <Input type="date" {...register("effectiveUntil")} />
         </div>
       </div>
 
@@ -212,8 +236,8 @@ export default function LogisticsPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        title="Logistics Contracts"
-        description="Repository of carrier contracts. Sprint 2 maps slab rates into the pricing engine."
+        title="Logistics & Rate Cards"
+        description="Reference documents plus structured courier tariffs. Documents are for reference; structured rate-card data is entered separately."
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} className="gap-1.5 text-xs">
@@ -227,6 +251,13 @@ export default function LogisticsPage() {
         }
       />
 
+      <Tabs defaultValue="documents" className="mt-2">
+        <TabsList className="mb-4">
+          <TabsTrigger value="documents">Uploaded Documents</TabsTrigger>
+          <TabsTrigger value="rate-cards">Courier Rate Cards</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="documents">
       {/* Summary */}
       {logisticsContracts.length > 0 && (
         <div className="flex gap-3 mb-6 text-xs text-muted-foreground">
@@ -331,6 +362,13 @@ export default function LogisticsPage() {
           </Table>
         </div>
       )}
+
+        </TabsContent>
+
+        <TabsContent value="rate-cards">
+          <CourierRateCardsTab />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={addOpen} onOpenChange={(o) => { if (!o) { setAddOpen(false); setPendingFile(null); } }}>
         <DialogContent className="max-w-lg">

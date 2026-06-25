@@ -19,7 +19,10 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/layout/page-header";
+import { FulfilmentRoutesTab } from "@/components/fulfilment/fulfilment-routes-tab";
+import { ProviderCommercials } from "@/components/fulfilment/provider-commercials";
 import { useAppStore } from "@/store/app-store";
 import type { FulfilmentProvider, ProviderType } from "@/models";
 import { useToast } from "@/hooks/use-toast";
@@ -230,8 +233,8 @@ export default function FulfilmentPage() {
   return (
     <div className="animate-fade-in">
       <PageHeader
-        title="Fulfilment Providers"
-        description="Warehousing and dispatch infrastructure. Fixed costs stay at portfolio level — never per-unit."
+        title="Fulfilment"
+        description="Providers and routes. Fixed/commitment costs stay at portfolio level — never per-unit. Per-unit, per-order, storage and value-added fees are tracked separately."
         actions={
           <Button size="sm" onClick={() => setAddOpen(true)} className="gap-1.5">
             <Plus className="h-4 w-4" /> Add provider
@@ -239,6 +242,13 @@ export default function FulfilmentPage() {
         }
       />
 
+      <Tabs defaultValue="providers" className="mt-2">
+        <TabsList className="mb-4">
+          <TabsTrigger value="providers">Providers</TabsTrigger>
+          <TabsTrigger value="routes">Fulfilment Routes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="providers">
       {/* Fixed cost callout */}
       {totalMonthlyFixed > 0 && (
         <div className="mb-6 rounded-lg border bg-muted/30 px-4 py-3 flex items-center justify-between">
@@ -333,12 +343,19 @@ export default function FulfilmentPage() {
                   {provider.notes && (
                     <p className="mt-3 text-[10px] text-muted-foreground border-t pt-2">{provider.notes}</p>
                   )}
+                  <ProviderCommercials provider={provider} />
                 </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="routes">
+          <FulfilmentRoutesTab />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent className="max-w-lg">

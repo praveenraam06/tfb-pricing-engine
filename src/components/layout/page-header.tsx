@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAppStore } from "@/store/app-store";
 import { exportJSON, importJSON } from "@/utils/export";
+import { buildExportData } from "@/lib/persistence";
 import { useToast } from "@/hooks/use-toast";
 
 interface PageHeaderProps {
@@ -33,16 +34,8 @@ export function PageHeader({ title, description, actions, showDataActions = fals
   const handleExport = () => {
     const { _hydrated, setHydrated, ...data } = store as typeof store & Record<string, unknown>;
     void _hydrated; void setHydrated;
-    // Extract only serialisable AppData fields
-    const appData = {
-      skus: store.skus,
-      packagingComponents: store.packagingComponents,
-      logisticsContracts: store.logisticsContracts,
-      fulfilmentProviders: store.fulfilmentProviders,
-      settings: store.settings,
-      shippingRecovery: store.shippingRecovery,
-      version: store.version,
-    };
+    // Extract only serialisable AppData fields (single source of truth)
+    const appData = buildExportData(store);
     exportJSON(appData);
     store.markBackup();
     toast({ title: "Backup exported", description: "JSON file downloaded. This is your source of truth." });

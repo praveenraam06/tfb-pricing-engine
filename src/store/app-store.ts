@@ -14,10 +14,13 @@ import {
   PackagingComponent,
   LogisticsContract,
   FulfilmentProvider,
+  CourierRateCard,
+  FulfilmentRoute,
   Settings,
   GSTClass,
   ChannelFeeRule,
 } from "@/models";
+import { applyAppDataDefaults } from "@/lib/persistence";
 
 // ─── Store Interface ─────────────────────────────────────────
 
@@ -46,6 +49,16 @@ interface AppStore extends AppData {
   addFulfilmentProvider: (p: Omit<FulfilmentProvider, "id" | "createdAt" | "updatedAt">) => string;
   updateFulfilmentProvider: (id: string, updates: Partial<FulfilmentProvider>) => void;
   deleteFulfilmentProvider: (id: string) => void;
+
+  // ── Courier Rate Cards (Sprint 4) ──
+  addCourierRateCard: (c: Omit<CourierRateCard, "id" | "createdAt" | "updatedAt">) => string;
+  updateCourierRateCard: (id: string, updates: Partial<CourierRateCard>) => void;
+  deleteCourierRateCard: (id: string) => void;
+
+  // ── Fulfilment Routes (Sprint 4) ──
+  addFulfilmentRoute: (r: Omit<FulfilmentRoute, "id" | "createdAt" | "updatedAt">) => string;
+  updateFulfilmentRoute: (id: string, updates: Partial<FulfilmentRoute>) => void;
+  deleteFulfilmentRoute: (id: string) => void;
 
   // ── Settings Actions ──
   updateSettings: (updates: Partial<Settings>) => void;
@@ -175,6 +188,50 @@ export const useAppStore = create<AppStore>()(
           fulfilmentProviders: state.fulfilmentProviders.filter((p) => p.id !== id),
         })),
 
+      // ── Courier Rate Cards (Sprint 4) ────────────────────
+      addCourierRateCard: (c) => {
+        const id = uuidv4();
+        set((state) => ({
+          courierRateCards: [
+            ...(state.courierRateCards ?? []),
+            { ...c, id, createdAt: now(), updatedAt: now() },
+          ],
+        }));
+        return id;
+      },
+      updateCourierRateCard: (id, updates) =>
+        set((state) => ({
+          courierRateCards: (state.courierRateCards ?? []).map((c) =>
+            c.id === id ? { ...c, ...updates, updatedAt: now() } : c
+          ),
+        })),
+      deleteCourierRateCard: (id) =>
+        set((state) => ({
+          courierRateCards: (state.courierRateCards ?? []).filter((c) => c.id !== id),
+        })),
+
+      // ── Fulfilment Routes (Sprint 4) ─────────────────────
+      addFulfilmentRoute: (r) => {
+        const id = uuidv4();
+        set((state) => ({
+          fulfilmentRoutes: [
+            ...(state.fulfilmentRoutes ?? []),
+            { ...r, id, createdAt: now(), updatedAt: now() },
+          ],
+        }));
+        return id;
+      },
+      updateFulfilmentRoute: (id, updates) =>
+        set((state) => ({
+          fulfilmentRoutes: (state.fulfilmentRoutes ?? []).map((r) =>
+            r.id === id ? { ...r, ...updates, updatedAt: now() } : r
+          ),
+        })),
+      deleteFulfilmentRoute: (id) =>
+        set((state) => ({
+          fulfilmentRoutes: (state.fulfilmentRoutes ?? []).filter((r) => r.id !== id),
+        })),
+
       // ── Settings ─────────────────────────────────────────
       updateSettings: (updates) =>
         set((state) => ({ settings: { ...state.settings, ...updates } })),
@@ -215,17 +272,7 @@ export const useAppStore = create<AppStore>()(
         })),
 
       // ── Data Management ──────────────────────────────────
-      importData: (data) =>
-        set({
-          ...DEFAULT_APP_DATA,
-          ...data,
-          // Guarantee all four channel keys exist even for old/partial backups.
-          shippingRecovery: {
-            ...DEFAULT_APP_DATA.shippingRecovery,
-            ...(data.shippingRecovery ?? {}),
-          },
-          _hydrated: true,
-        }),
+      importData: (data) => set({ ...applyAppDataDefaults(data), _hydrated: true }),
       resetData: () => set({ ...DEFAULT_APP_DATA, _hydrated: true }),
       markBackup: () =>
         set((state) => ({

@@ -33,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   // Data
   { group: "Manage", label: "SKU Master", href: "/skus", icon: Package },
   { group: "Manage", label: "Cost Library", href: "/library", icon: Library },
-  { group: "Manage", label: "Logistics", href: "/logistics", icon: Truck },
+  { group: "Manage", label: "Logistics & Rate Cards", href: "/logistics", icon: Truck },
   { group: "Manage", label: "Fulfilment", href: "/fulfilment", icon: Warehouse },
   // Pricing (Sprint 2)
   { group: "Pricing", label: "Pricing Engine", href: "/pricing", icon: Calculator },
